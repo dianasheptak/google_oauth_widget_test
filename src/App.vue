@@ -1,54 +1,58 @@
 <template>
-  <main>
-    <h1>Google Auth with GIS</h1>
-    <h2>Is Initialized: {{ !!initGoogleAuth }}</h2>
+  <main class="wrapper">
+    <h1 v-if="!user">The User is not logged in.</h1>
+    <h1 v-else>Now the user is logged in!</h1>
 
-    <div ref="googleBtn"></div>
-    <div v-if="user">
-      <p><strong>Name:</strong> {{ user.name }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <img :src="user.picture" alt="Profile picture" />
+    <GoogleLogin v-if="!user" :callback="callback" />
+
+    <div v-if="user" class="user-info">
+      <p><strong>Welcome!</strong></p>
+      <p>Username: {{ user.name }}</p>
+      <img :src="user.picture" />
     </div>
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
+import { GoogleLogin } from 'vue3-google-login'
 
 const user = ref(null)
-const googleBtn = ref(null)
 
-function initGoogleAuth() {
-  window.google.accounts.id.initialize({
-    client_id: '647845422592-camt250uq3f9j80oei2bdjm30u2sn6a5.apps.googleusercontent.com',
-    callback: (response) => {
-      const data = parseJwt(response.credential)
-      user.value = data
-    }
-  })
+const callback = (response) => {
+  const data = parseJwt(response.credential)
+  user.value = data
+  console.log("Logged in:", data)
 }
-
-onMounted(() => {
-
-  initGoogleAuth();
-  window.google.accounts.id.renderButton(googleBtn.value, {
-    theme: 'outline',
-    size: 'large',
-  })
-})
 
 function parseJwt(token) {
   return JSON.parse(atob(token.split('.')[1]))
 }
 </script>
 
-<style scoped>
-main {
-  padding: 2rem;
-  font-family: sans-serif;
+<style>
+body {
+  background-color: indigo;
+  color: ivory;
 }
+main {
+  font-family: sans-serif;
+  text-align: center;
+  padding: 2rem;
+}
+
 img {
-  width: 100px;
   border-radius: 50%;
+  width: 80px;
+  margin-top: 10px;
+}
+
+.wrapper {
+  display: block;
+  margin: 0 auto;
+  width: 20vw;
+  height: 40vh;
+  border: 1px solid ivory;
+  border-radius: 12px;
 }
 </style>
